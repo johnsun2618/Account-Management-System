@@ -1,6 +1,7 @@
 package com.insuranceManagement.Service.Implementation;
 
 import com.insuranceManagement.Entity.Account;
+import com.insuranceManagement.Exception.AccountAlreadyExistsException;
 import com.insuranceManagement.Exception.ResourceNotFoundException;
 import com.insuranceManagement.Repository.AccountRepository;
 import com.insuranceManagement.Service.AccountService;
@@ -29,13 +30,20 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account addNewAccount(Account account) throws Exception {
         try {
+//            Check if the account already exists
+            Optional<Account> existingAccount = accountRepository.findById(account.getAcctID());
+            if (existingAccount.isPresent()) {
+//                If account is already present, throw an exception or return a specific response
+                throw new AccountAlreadyExistsException("Account already present in the database");
+            }
+//            Save the new account if it does not exist
             return accountRepository.save(account);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Error occurred while saving the new account: {}", e.getMessage(), e);
-            throw new Exception("Something went wrong please check then try again", e);
+            throw new Exception("Something went wrong, please check and try again", e);
         }
     }
+
 
     //    Before inserting data into the database, check if the record with the given AcctID already exists.
 //    If it exists, skip the insertion; otherwise, insert the new record.
